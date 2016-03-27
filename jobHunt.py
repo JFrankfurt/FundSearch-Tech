@@ -53,6 +53,7 @@ class getFirms:
 
             for x, row in enumerate(response['rows']):
                 info = dict()
+                added = False
                 if (row['current_percent_of_portfolio'] <= percentHigh and
                         row['current_percent_of_portfolio'] >= percentLow and
                         row['state'] in statesList):
@@ -60,11 +61,24 @@ class getFirms:
                     info['state'] = row['state']
                     info['count'] = 1
                     info['cumulative'] = row['current_percent_of_portfolio']
-                    print(self.tickers[i], info)
+                    info['companies'] = [self.tickers[i]]
+                    if (len(holdingFirms) == 0):
+                        holdingFirms.append(info)
+                        added = True
+                    else:
+                        for z in holdingFirms:
+                            if (z['name'] == info['name']):
+                                z['count'] += 1
+                                z['cumulative'] += info['cumulative']
+                                z['companies'].append(self.tickers[i])
+                                added = True
+                    if (added is not True):
+                        holdingFirms.append(info)
+
         return holdingFirms
 
 
-# public stocks from VCs I respect (Sutter Hill, Accel, Sequoia, A16Z, etc.)
+# public companies from VCs I respect (Sutter Hill, Accel, Sequoia, A16Z, etc.)
 testList = ['googl', 'team', 'rng', 'nvda', 'vbay']
 '''tickerList = ['pstg', 'infn', 'pacb-2', 'vbay', 'xlrn-2', 'ptla-2', 'rkus',
               'hznp', 'yoku', 'sq', 'run', 'pypl', 'ntra', 'hubs', 'ydle',
@@ -83,7 +97,7 @@ testList = ['googl', 'team', 'rng', 'nvda', 'vbay']
 # places wife and I are okay with living
 statesList = ['CA', 'MA', 'CT', 'NY', 'IL', 'TX']
 
-# holding collar
+# % holding collar
 percentLow = 1.5
 percentHigh = 70
 
