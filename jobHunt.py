@@ -14,7 +14,8 @@ import csv
 
 class FundHunt:
     def __init__(self, tickers):
-        self.tickers = tickers
+        cleantickers = list(set(tickers))
+        self.tickers = sorted(cleantickers)
         self.baseURL = 'http://whalewisdom.com/stock/'
         self.holdingsURL = self.baseURL + 'holdings'
 
@@ -31,7 +32,7 @@ class FundHunt:
             tickerID = str(a.findall(tableID)[0])
             wwids.append(tickerID)
             time.sleep(0.5)
-
+        print(wwids)
         return wwids
 
     def getInfo(self, percentHigh, percentLow, statesList):
@@ -50,13 +51,20 @@ class FundHunt:
                 'sord': 'desc'
                 }
             response = requests.get(self.holdingsURL, params=p).json()
-            time.sleep(0.5)
-
             for x, row in enumerate(response['rows']):
+                if (isinstance(row['current_percent_of_portfolio'], float) and
+                        len(response['rows']) > 0):
+                    pass
+                else:
+                    print('''there was an error with the current percent of
+                        portfolio row at index {:d}'''.format(x))
+                    print("error with stock {:d}: ".format(i), self.tickers[i])
+                    continue
                 info = dict()
                 added = False
-                if (row['current_percent_of_portfolio'] <= percentHigh and
-                        row['current_percent_of_portfolio'] >= percentLow and
+                print('--', row['name'], '--')
+                if (int(row['current_percent_of_portfolio']) <= percentHigh and
+                        int(row['current_percent_of_portfolio']) >= percentLow and
                         row['state'] in statesList):
                     info['name'] = row['name']
                     info['state'] = row['state']
@@ -89,18 +97,18 @@ class FundHunt:
 
 # public companies from VCs I respect (Sutter Hill, Accel, Sequoia, A16Z, etc.)
 tickerList = ['pstg', 'infn', 'pacb-2', 'vbay', 'xlrn-2', 'ptla-2', 'rkus',
-              'hznp', 'yoku', 'sq', 'run', 'pypl', 'ntra', 'hubs', 'ydle',
-              'jmei', 'nmbl', 'cuda', 'rng', 'feye-2', 'trla', 'twtr', 'baba-4',
-              'hdp', 'newr', 'zen', 'grub', 'wix', 'fnjn', 'mrin', 'amba-2',
+              'hznp', 'yoku', 'sq', 'run', 'pypl', 'hubs','jmei', 'nmbl',
+              'cuda', 'rng', 'feye-2', 'trla', 'twtr', 'baba-4', 'hdp',
+              'newr', 'zen', 'grub', 'wix', 'fnjn', 'mrin', 'amba-2',
               'pfpt', 'yelp', 'amzn', 'z', 'zip', 'ondk', 'bv', 'ntra', 'fb',
-              'team', 'run', 'etsy', 'ydle', 'opwr', 'vrns-2', 'nmbl', 'yume',
+              'team', 'etsy', 'opwr', 'vrns-2', 'yume', 'rvbd', 'tsla',
               'modn', 'nflx', 'goog', 'msft', 'nvda', 'gddy', 'adbe', 'crm',
-              'gimo', 'cksw', 'elnk', 'gib', 'dox', 'infy', 'acn', 'hckt',
+              'gimo', 'elnk', 'gib', 'dox', 'infy', 'acn', 'hckt',
               'caci', 'ctsh', 'mant', 'wit', 'tsri', 'elli', 'akam', 'vrnt',
               'ftnt', 'opwv', 'sncr', 'panw', 'vdsi', 'avgo', 'cvg', 'gpn',
               'gsb', 'jcom', 'jkhy', 'lrcx', 'ma', 'ntes', 'payx', 'tss',
               'txn', 'v', 'googl', 'anet', 'aten', 'fuel-3', 'ubnt', 'frf',
-              'flt-2', 'bsft']
+              'flt-2', 'bsft', 'lnkd', 'aapl', 'eqix', 'ebix', 'qlik', 'athn']
 
 # places wife and I are okay with living
 statesList = ['CA', 'MA', 'CT', 'NY', 'IL', 'TX']
