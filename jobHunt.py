@@ -9,9 +9,10 @@ import requests
 from bs4 import BeautifulSoup
 import time
 import re
+import csv
 
 
-class getFirms:
+class FundHunt:
     def __init__(self, tickers):
         self.tickers = tickers
         self.baseURL = 'http://whalewisdom.com/stock/'
@@ -33,9 +34,9 @@ class getFirms:
 
         return wwids
 
-    def holdingFirms(self, percentHigh, percentLow, statesList):
+    def getInfo(self, percentHigh, percentLow, statesList):
         stockIDs = self._getIDs()
-        holdingFirms = []
+        fundInfo = []
 
         for i, item in enumerate(stockIDs):
             p = {
@@ -62,25 +63,32 @@ class getFirms:
                     info['count'] = 1
                     info['cumulative'] = row['current_percent_of_portfolio']
                     info['companies'] = [self.tickers[i]]
-                    if (len(holdingFirms) == 0):
-                        holdingFirms.append(info)
+                    if (len(fundInfo) == 0):
+                        fundInfo.append(info)
                         added = True
                     else:
-                        for z in holdingFirms:
+                        for z in fundInfo:
                             if (z['name'] == info['name']):
                                 z['count'] += 1
                                 z['cumulative'] += info['cumulative']
                                 z['companies'].append(self.tickers[i])
                                 added = True
                     if (added is not True):
-                        holdingFirms.append(info)
+                        fundInfo.append(info)
+        return fundInfo
 
-        return holdingFirms
+    def exportToCSV(self, data):
+        with open('data.csv', 'w') as csvfile:
+            fieldnames = data[0].keys()
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames, lineterminator='\n')
+
+            writer.writeheader()
+            for i, data in enumerate(data):
+                writer.writerow(data)
 
 
 # public companies from VCs I respect (Sutter Hill, Accel, Sequoia, A16Z, etc.)
-testList = ['googl', 'team', 'rng', 'nvda', 'vbay']
-'''tickerList = ['pstg', 'infn', 'pacb-2', 'vbay', 'xlrn-2', 'ptla-2', 'rkus',
+tickerList = ['pstg', 'infn', 'pacb-2', 'vbay', 'xlrn-2', 'ptla-2', 'rkus',
               'hznp', 'yoku', 'sq', 'run', 'pypl', 'ntra', 'hubs', 'ydle',
               'jmei', 'nmbl', 'cuda', 'rng', 'feye-2', 'trla', 'twtr', 'baba-4',
               'hdp', 'newr', 'zen', 'grub', 'wix', 'fnjn', 'mrin', 'amba-2',
@@ -92,7 +100,7 @@ testList = ['googl', 'team', 'rng', 'nvda', 'vbay']
               'ftnt', 'opwv', 'sncr', 'panw', 'vdsi', 'avgo', 'cvg', 'gpn',
               'gsb', 'jcom', 'jkhy', 'lrcx', 'ma', 'ntes', 'payx', 'tss',
               'txn', 'v', 'googl', 'anet', 'aten', 'fuel-3', 'ubnt', 'frf',
-              'flt-2', 'bsft']'''
+              'flt-2', 'bsft']
 
 # places wife and I are okay with living
 statesList = ['CA', 'MA', 'CT', 'NY', 'IL', 'TX']
@@ -101,6 +109,6 @@ statesList = ['CA', 'MA', 'CT', 'NY', 'IL', 'TX']
 percentLow = 1.5
 percentHigh = 70
 
-x = getFirms(testList)
-y = x.holdingFirms(percentHigh, percentLow, statesList)
-print(y)
+x = FundHunt(tickerList)
+y = x.getInfo(percentHigh, percentLow, statesList)
+x.exportToCSV(y)
