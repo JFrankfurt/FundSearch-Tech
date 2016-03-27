@@ -3,6 +3,34 @@
 Created on Sat Mar 26 13:23:45 2016
 
 @author: Jordan
+
+EXAMPLE USAGE:
+# public companies from VCs I respect (Sutter Hill, Accel, Sequoia, A16Z, etc.)
+tickerList = ['pstg', 'infn', 'pacb-2', 'vbay', 'xlrn-2', 'ptla-2', 'rkus',
+              'hznp', 'yoku', 'sq', 'run', 'pypl', 'hubs','jmei', 'nmbl',
+              'cuda', 'rng', 'feye-2', 'trla', 'twtr', 'baba-4', 'hdp',
+              'newr', 'zen', 'grub', 'wix', 'fnjn', 'mrin', 'amba-2',
+              'pfpt', 'yelp', 'amzn', 'z', 'zip', 'ondk', 'bv', 'ntra', 'fb',
+              'team', 'etsy', 'opwr', 'vrns-2', 'yume', 'rvbd', 'tsla',
+              'modn', 'nflx', 'goog', 'msft', 'nvda', 'gddy', 'adbe', 'crm',
+              'gimo', 'elnk', 'gib', 'dox', 'infy', 'acn', 'hckt',
+              'caci', 'ctsh', 'mant', 'wit', 'tsri', 'elli', 'akam', 'vrnt',
+              'ftnt', 'opwv', 'sncr', 'panw', 'vdsi', 'avgo', 'cvg', 'gpn',
+              'gsb', 'jcom', 'jkhy', 'lrcx', 'ma', 'ntes', 'payx', 'tss',
+              'txn', 'v', 'googl', 'anet', 'aten', 'fuel-3', 'ubnt', 'frf',
+              'flt-2', 'bsft', 'lnkd', 'aapl', 'eqix', 'ebix', 'qlik', 'athn']
+
+# places wife and I are okay with living
+statesList = ['CA', 'MA', 'CT', 'NY', 'IL', 'TX']
+
+# % holding collar
+percentLow = 1.5
+percentHigh = 70
+
+x = FundHunt(tickerList)
+y = x.getInfo(percentHigh, percentLow, statesList)
+x.exportToCSV(y)
+
 """
 
 import requests
@@ -96,30 +124,3 @@ class FundHunt:
             writer.writeheader()
             for i, data in enumerate(data):
                 writer.writerow(data)
-
-
-# public companies from VCs I respect (Sutter Hill, Accel, Sequoia, A16Z, etc.)
-tickerList = ['pstg', 'infn', 'pacb-2', 'vbay', 'xlrn-2', 'ptla-2', 'rkus',
-              'hznp', 'yoku', 'sq', 'run', 'pypl', 'hubs','jmei', 'nmbl',
-              'cuda', 'rng', 'feye-2', 'trla', 'twtr', 'baba-4', 'hdp',
-              'newr', 'zen', 'grub', 'wix', 'fnjn', 'mrin', 'amba-2',
-              'pfpt', 'yelp', 'amzn', 'z', 'zip', 'ondk', 'bv', 'ntra', 'fb',
-              'team', 'etsy', 'opwr', 'vrns-2', 'yume', 'rvbd', 'tsla',
-              'modn', 'nflx', 'goog', 'msft', 'nvda', 'gddy', 'adbe', 'crm',
-              'gimo', 'elnk', 'gib', 'dox', 'infy', 'acn', 'hckt',
-              'caci', 'ctsh', 'mant', 'wit', 'tsri', 'elli', 'akam', 'vrnt',
-              'ftnt', 'opwv', 'sncr', 'panw', 'vdsi', 'avgo', 'cvg', 'gpn',
-              'gsb', 'jcom', 'jkhy', 'lrcx', 'ma', 'ntes', 'payx', 'tss',
-              'txn', 'v', 'googl', 'anet', 'aten', 'fuel-3', 'ubnt', 'frf',
-              'flt-2', 'bsft', 'lnkd', 'aapl', 'eqix', 'ebix', 'qlik', 'athn']
-
-# places wife and I are okay with living
-statesList = ['CA', 'MA', 'CT', 'NY', 'IL', 'TX']
-
-# % holding collar
-percentLow = 1.5
-percentHigh = 70
-
-x = FundHunt(tickerList)
-y = x.getInfo(percentHigh, percentLow, statesList)
-x.exportToCSV(y)
