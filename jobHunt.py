@@ -22,7 +22,9 @@ class FundHunt:
     def _getIDs(self):
         wwids = []
         a = re.compile(r'\d+')
-
+        if (len(self.tickers) > 20):
+            print("This might take a while...")
+        print("Getting lookup IDs from 13F filings...")
         for i, item in enumerate(self.tickers):
             response = requests.get(self.baseURL + self.tickers[i]).text
             soup = BeautifulSoup(response, "lxml")
@@ -31,7 +33,7 @@ class FundHunt:
                 }).string
             tickerID = str(a.findall(tableID)[0])
             wwids.append(tickerID)
-            time.sleep(0.5)
+            time.sleep(0.25)
         print(wwids)
         return wwids
 
@@ -40,6 +42,7 @@ class FundHunt:
         fundInfo = []
 
         for i, item in enumerate(stockIDs):
+            print("Getting holding info for: ", self.tickers[i])
             p = {
                 'id': item,
                 'q1': '60',
@@ -62,7 +65,7 @@ class FundHunt:
                     continue
                 info = dict()
                 added = False
-                print('--', row['name'], '--')
+                print(row['name'])
                 if (int(row['current_percent_of_portfolio']) <= percentHigh and
                         int(row['current_percent_of_portfolio']) >= percentLow and
                         row['state'] in statesList):
