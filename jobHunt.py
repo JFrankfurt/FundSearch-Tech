@@ -42,6 +42,30 @@ class FundHunt:
         print(wwids)
         return wwids
 
+    def _constraints(self, fundInfo, minAUM):
+        a = re.compile(r'\d+')
+        toDel = []
+        for q, firm in enumerate(fundInfo):
+            lookupName = ''.join(c for c in firm["name"] if c not in punctuation)
+            lookupName = re.sub(r"\s+", '-', lookupName)
+            lookupURL = "%s/filer/%s" % (self.baseURL, lookupName)
+            response = requests.get(lookupURL).text
+            soup = BeautifulSoup(response, "lxml")
+            aumtext = soup.find("div", class_="info activity").ul.li
+            preaumtext = aumtext.find_next_sibling()
+            preaumtext = ''.join(c for c in preaumtext.text if c not in punctuation)
+            firm["previousaum"] = round(int(a.findall(preaumtext)[0])/1000000)
+            aumtext = ''.join(c for c in aumtext.text if c not in punctuation)
+            firm["aum"] = round(int(a.findall(aumtext)[0])/1000000)
+            if (firm["aum"] < minAUM):
+                toDel.append(True)
+            else:
+                toDel.append(False)
+        for q, firm in enumerate(toDel):
+            if (firm is True):
+                del fundInfo[q]
+        return fundInfo
+
     def getInfo(self, holdingPercentages, statesList, minAUM):
         stockIDs = self._getIDs()
         fundInfo = []
@@ -71,7 +95,6 @@ class FundHunt:
                     continue
                 info = dict()
                 added = False
-                print(row['name'])
                 if (int(row['current_percent_of_portfolio']) <= holdingPercentages[1] and
                         int(row['current_percent_of_portfolio']) >= holdingPercentages[0] and
                         row['state'] in statesList):
@@ -80,6 +103,7 @@ class FundHunt:
                     info['count'] = 1
                     info['cumulative'] = row['current_percent_of_portfolio']
                     info['companies'] = [self.tickers[i]]
+                    print(row['name'])
                     if (len(fundInfo) == 0):
                         fundInfo.append(info)
                         added = True
@@ -92,6 +116,7 @@ class FundHunt:
                                 added = True
                     if (added is not True):
                         fundInfo.append(info)
+        fundInfo = self._constraints(fundInfo, minAUM)
         return fundInfo
 
     def exportToCSV(self, data):
@@ -117,7 +142,7 @@ tickerList = ['pstg']
               'gsb', 'jcom', 'jkhy', 'lrcx', 'ma', 'ntes', 'payx', 'tss',
               'txn', 'v', 'googl', 'anet', 'aten', 'fuel-3', 'ubnt', 'frf',
               'flt-2', 'bsft', 'lnkd', 'aapl', 'eqix', 'ebix', 'qlik',
-              'athn', 'ebay', 'adbe']'''
+              'athn', 'ebay', 'adbe', 'wday', 'hpq', 'n', 'orcl', 'ilmn']'''
 
 # places wife and I are okay with living
 statesList = ['CA', 'MA', 'CT', 'NY', 'IL', 'TX']
