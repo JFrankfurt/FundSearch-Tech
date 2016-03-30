@@ -42,13 +42,13 @@ class FundHunt:
         print(wwids)
         return wwids
 
-    def getInfo(self, percentHigh, percentLow, statesList):
+    def getInfo(self, holdingPercentages, statesList, minAUM):
         stockIDs = self._getIDs()
         fundInfo = []
 
         for i, item in enumerate(stockIDs):
             print("Getting holding info for: ", self.tickers[i])
-            holdingsURL = "%s/stock/holdings"% (self.baseURL)
+            holdingsURL = "%s/stock/holdings" % (self.baseURL)
             p = {
                 'id': item,
                 'q1': '60',
@@ -72,8 +72,8 @@ class FundHunt:
                 info = dict()
                 added = False
                 print(row['name'])
-                if (int(row['current_percent_of_portfolio']) <= percentHigh and
-                        int(row['current_percent_of_portfolio']) >= percentLow and
+                if (int(row['current_percent_of_portfolio']) <= holdingPercentages[1] and
+                        int(row['current_percent_of_portfolio']) >= holdingPercentages[0] and
                         row['state'] in statesList):
                     info['name'] = row['name']
                     info['state'] = row['state']
@@ -122,10 +122,10 @@ tickerList = ['pstg']
 # places wife and I are okay with living
 statesList = ['CA', 'MA', 'CT', 'NY', 'IL', 'TX']
 
-# % holding collar
-percentLow = 1.5
-percentHigh = 70
+# % holding collar (min, max)
+holdingPercentages = (1.5, 70)
+minAUM = 400
 
 x = FundHunt(tickerList)
-y = x.getInfo(percentHigh, percentLow, statesList)
+y = x.getInfo(holdingPercentages, statesList, minAUM)
 x.exportToCSV(y)
