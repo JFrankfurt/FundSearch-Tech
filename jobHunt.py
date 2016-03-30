@@ -5,31 +5,7 @@ Created on Sat Mar 26 13:23:45 2016
 @author: Jordan
 
 EXAMPLE USAGE:
-# public companies from VCs I respect (Sutter Hill, Accel, Sequoia, A16Z, etc.)
-tickerList = ['pstg', 'infn', 'pacb-2', 'vbay', 'xlrn-2', 'ptla-2', 'rkus',
-              'hznp', 'yoku', 'sq', 'run', 'pypl', 'hubs','jmei', 'nmbl',
-              'cuda', 'rng', 'feye-2', 'trla', 'twtr', 'baba-4', 'hdp',
-              'newr', 'zen', 'grub', 'wix', 'fnjn', 'mrin', 'amba-2',
-              'pfpt', 'yelp', 'amzn', 'z', 'zip', 'ondk', 'bv', 'ntra', 'fb',
-              'team', 'etsy', 'opwr', 'vrns-2', 'yume', 'rvbd', 'tsla',
-              'modn', 'nflx', 'goog', 'msft', 'nvda', 'gddy', 'adbe', 'crm',
-              'gimo', 'elnk', 'gib', 'dox', 'infy', 'acn', 'hckt',
-              'caci', 'ctsh', 'mant', 'wit', 'tsri', 'elli', 'akam', 'vrnt',
-              'ftnt', 'opwv', 'sncr', 'panw', 'vdsi', 'avgo', 'cvg', 'gpn',
-              'gsb', 'jcom', 'jkhy', 'lrcx', 'ma', 'ntes', 'payx', 'tss',
-              'txn', 'v', 'googl', 'anet', 'aten', 'fuel-3', 'ubnt', 'frf',
-              'flt-2', 'bsft', 'lnkd', 'aapl', 'eqix', 'ebix', 'qlik', 'athn']
 
-# places wife and I are okay with living
-statesList = ['CA', 'MA', 'CT', 'NY', 'IL', 'TX']
-
-# % holding collar
-percentLow = 1.5
-percentHigh = 70
-
-x = FundHunt(tickerList)
-y = x.getInfo(percentHigh, percentLow, statesList)
-x.exportToCSV(y)
 
 """
 
@@ -38,13 +14,13 @@ from bs4 import BeautifulSoup
 import time
 import re
 import csv
-
+from string import punctuation
 
 class FundHunt:
     def __init__(self, tickers):
         cleantickers = list(set(tickers))
         self.tickers = sorted(cleantickers)
-        self.baseURL = 'http://whalewisdom.com/stock/'
+        self.baseURL = 'http://whalewisdom.com'
         self.holdingsURL = self.baseURL + 'holdings'
 
     def _getIDs(self):
@@ -54,7 +30,8 @@ class FundHunt:
             print("This might take a while...")
         print("Getting lookup IDs from 13F filings...")
         for i, item in enumerate(self.tickers):
-            response = requests.get(self.baseURL + self.tickers[i]).text
+            stockURL = "%s/stock/%s" % (self.baseURL, item)
+            response = requests.get(stockURL).text
             soup = BeautifulSoup(response, "lxml")
             tableID = soup.find(attrs={
                 "xmlns": "http://www.w3.org/1999/html"
@@ -71,6 +48,7 @@ class FundHunt:
 
         for i, item in enumerate(stockIDs):
             print("Getting holding info for: ", self.tickers[i])
+            holdingsURL = "%s/stock/holdings"% (self.baseURL)
             p = {
                 'id': item,
                 'q1': '60',
@@ -81,7 +59,7 @@ class FundHunt:
                 'sidx': 'current_percent_of_portfolio',
                 'sord': 'desc'
                 }
-            response = requests.get(self.holdingsURL, params=p).json()
+            response = requests.get(holdingsURL, params=p).json()
             for x, row in enumerate(response['rows']):
                 if (isinstance(row['current_percent_of_portfolio'], float) and
                         len(response['rows']) > 0):
@@ -124,3 +102,30 @@ class FundHunt:
             writer.writeheader()
             for i, data in enumerate(data):
                 writer.writerow(data)
+# public companies from VCs I respect (Sutter Hill, Accel, Sequoia, A16Z, etc.)
+tickerList = ['pstg']
+''', 'infn', 'pacb-2', 'vbay', 'xlrn-2', 'ptla-2', 'rkus',
+              'hznp', 'yoku', 'sq', 'run', 'pypl', 'hubs','jmei', 'nmbl',
+              'cuda', 'rng', 'feye-2', 'trla', 'twtr', 'baba-4', 'hdp',
+              'newr', 'zen', 'grub', 'wix', 'fnjn', 'mrin', 'amba-2',
+              'pfpt', 'yelp', 'amzn', 'z', 'zip', 'ondk', 'bv', 'ntra', 'fb',
+              'team', 'etsy', 'opwr', 'vrns-2', 'yume', 'rvbd', 'tsla',
+              'modn', 'nflx', 'goog', 'msft', 'nvda', 'gddy', 'adbe', 'crm',
+              'gimo', 'elnk', 'gib', 'dox', 'infy', 'acn', 'hckt',
+              'caci', 'ctsh', 'mant', 'wit', 'tsri', 'elli', 'akam', 'vrnt',
+              'ftnt', 'opwv', 'sncr', 'panw', 'vdsi', 'avgo', 'cvg', 'gpn',
+              'gsb', 'jcom', 'jkhy', 'lrcx', 'ma', 'ntes', 'payx', 'tss',
+              'txn', 'v', 'googl', 'anet', 'aten', 'fuel-3', 'ubnt', 'frf',
+              'flt-2', 'bsft', 'lnkd', 'aapl', 'eqix', 'ebix', 'qlik',
+              'athn', 'ebay', 'adbe']'''
+
+# places wife and I are okay with living
+statesList = ['CA', 'MA', 'CT', 'NY', 'IL', 'TX']
+
+# % holding collar
+percentLow = 1.5
+percentHigh = 70
+
+x = FundHunt(tickerList)
+y = x.getInfo(percentHigh, percentLow, statesList)
+x.exportToCSV(y)
